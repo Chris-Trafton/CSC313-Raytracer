@@ -36,49 +36,10 @@ public class Raytracer {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
-
-
-//        // width of the image
-//        int width = 963;
-//        // height of the image
-//        int height = 640;
-//        // For storing image in RAM
-//        BufferedImage image = null;
-//        // READ IMAGE
-//        try {
-//            File input_file = new File("Goomba.png");
-//            // image file path create an object of
-//            // BufferedImage type and pass as parameter the
-//            // width,  height and image int
-//            // type. TYPE_INT_ARGB means that we are
-//            // representing the Alpha , Red, Green and Blue
-//            // component of the image pixel using 8 bit
-//            // integer value.
-//            image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-//            // Reading input file
-//            image = ImageIO.read(input_file);
-//            System.out.println("Reading complete.");
-//        }
-//        catch (IOException e) {
-//            System.out.println("Error: " + e);
-//        }
-//        // WRITE IMAGE
-//        try {
-//            // Output file path
-//            File output_file = new File("output.png");
-//            // Writing to file taking type and path as
-//            ImageIO.write(image, "png", output_file);
-//            System.out.println("Writing complete.");
-//        }
-//        catch (IOException e) {
-//            System.out.println("Error: " + e);
-//        }
     }
 
     //==================================================================================================================
-    // ========== Reads an Obj File and Stores it as a List ==========
+    //TODO ========== Reads an Obj File and Stores it as a List ==========
     public static List<float[]> readVertices(String filename) throws IOException {
         List<float[]> vertices = new ArrayList<>();
         BufferedReader reader = new BufferedReader(new FileReader(filename));
@@ -98,7 +59,7 @@ public class Raytracer {
     }
 
     //==================================================================================================================
-    // ========== Computes the Distance Between a Point and a Line ==========
+    //TODO ========== Computes the Distance Between a Point and a Line ==========
     public static double distancePointLine(double[] point, double[] linePoint1, double[] linePoint2) {
         double[] lineVector = new double[3];
         double[] pointToLineVector = new double[3];
@@ -145,7 +106,15 @@ public class Raytracer {
     }
 
     //==================================================================================================================
-    // ========== Computes the Angle Between Two Lines ==========
+    //TODO ========== Determine whether a line and triangle intersect ==========
+
+
+    //==================================================================================================================
+    //TODO ========== Determine which faces from the obj file a line intersects ==========
+
+
+    //==================================================================================================================
+    //TODO ========== Computes the Angle Between Two Lines ==========
     public static double angleBetweenLines(double[] line1Point1, double[] line1Point2,
                                            double[] line2Point1, double[] line2Point2) {
         double[] line1Vector = new double[3];
@@ -179,4 +148,52 @@ public class Raytracer {
         }
         return Math.sqrt(sumOfSquares);
     }
+
+    //==================================================================================================================
+    //TODO ========== Compute the illumination for a triangle ==========
+
+
+    //==================================================================================================================
+    //TODO ========== Raytrace an obj in 3D for illumination intensities over a 2D screen ==========
+
+
+    //==================================================================================================================
+    //TODO ========== Output screen pixels as an image ==========
+//    public static void exportPNG() {
+//        // width of the image
+//        int width = 963;
+//        // height of the image
+//        int height = 640;
+//        // For storing image in RAM
+//        BufferedImage image = null;
+//        // READ IMAGE
+//        try {
+//            File input_file = new File("Goomba.png");
+//            // image file path create an object of
+//            // BufferedImage type and pass as parameter the
+//            // width,  height and image int
+//            // type. TYPE_INT_ARGB means that we are
+//            // representing the Alpha , Red, Green and Blue
+//            // component of the image pixel using 8 bit
+//            // integer value.
+//            image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+//            // Reading input file
+//            image = ImageIO.read(input_file);
+//            System.out.println("Reading complete.");
+//        }
+//        catch (IOException e) {
+//            System.out.println("Error: " + e);
+//        }
+//        // WRITE IMAGE
+//        try {
+//            // Output file path
+//            File output_file = new File("output.png");
+//            // Writing to file taking type and path as
+//            ImageIO.write(image, "png", output_file);
+//            System.out.println("Writing complete.");
+//        }
+//        catch (IOException e) {
+//            System.out.println("Error: " + e);
+//        }
+//    }
 }
