@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.lang.Math;
+import java.util.Vector;
 
 public class Raytracer {
     public static void main(String[] args) throws IOException {
@@ -107,7 +108,62 @@ public class Raytracer {
 
     //==================================================================================================================
     //TODO ========== Determine whether a line and triangle intersect ==========
+    public static boolean intersects(double[] P0, double[] P1, double[] V0, double[] V1, double[] V2) {
+        double[] E1 = subtract(V1, V0);
+        double[] E2 = subtract(V2, V0);
+        double[] D = subtract(P1, P0);
+        double[] P = crossProduct(D, E2);
 
+        double det = dotProduct(E1, P);
+
+        // check if the ray is parallel to the triangle
+        if (det > -1e-6 && det < 1e-6) {
+            return false;
+        }
+
+        double invDet = 1.0 / det;
+        double[] T = subtract(P0, V0);
+        double u = dotProduct(T, P) * invDet;
+
+        // check if the intersection point is inside the triangle
+        if (u < 0 || u > 1)
+            return false;
+
+        double[] Q = crossProduct(T, E1);
+        double v = dotProduct(D, Q) * invDet;
+
+        // check if the intersection point is inside the triangle
+        if (v < 0 || u + v > 1)
+            return false;
+
+        double t = dotProduct(E2, Q) * invDet;
+
+        // check if the intersection point is in front of the line's starting point
+        if (t > 1e-6)
+            return true;
+
+        return false;
+    }
+
+    public static double[] subtract(double[] vector1, double[] vector2) {
+        double[] ret = new double[vector1.length];
+        for (int i = 0; i < vector1.length; i++) {
+            double d = vector1[i] - vector2[i];
+            ret[i] = d;
+        }
+//        double u = vector1[0] - vector2[0];
+//        double v = vector1[1] - vector2[1];
+//        double w = vector1[2] - vector2[2];
+        return ret;
+    }
+
+    public static double[] crossProduct(double[] vector1, double[] vector2) {
+        double[] ret = new double[vector1.length];
+        ret[0] = (vector1[1] * vector2[2]) - (vector1[2] * vector2[1]);
+        ret[1] = (vector1[2] * vector2[0]) - (vector1[0] * vector2[2]);
+        ret[2] = (vector1[0] * vector2[1]) - (vector1[1] * vector2[0]);
+        return ret;
+    }
 
     //==================================================================================================================
     //TODO ========== Determine which faces from the obj file a line intersects ==========
