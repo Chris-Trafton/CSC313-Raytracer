@@ -39,14 +39,25 @@ public class Raytracer {
         double[] line1Point2 = {1, 1, 1};
         double[] line2Point1 = {0, 0, 0};
         double[] line2Point2 = {1, -1, 1};
+        Vector3D lineStart = new Vector3D(0, 0, 0);
+        Vector3D lineEnd = new Vector3D(1, 1, 1);
 
         // 1/2: Read an obj file and store it as a list
+        List<Vector3D> vertices = new ArrayList<>();
+        List<int[]> faces = new ArrayList<>();
         try {
-            List<float[]> vertices = readVertices(filename);
-            System.out.println("Vertices:");
-            for (float[] vertex : vertices) {
-                System.out.println("(" + vertex[0] + ", " + vertex[1] + ", " + vertex[2] + ")");
-            }
+//            List<float[]> vertices = loadOBJ(filename);
+//            List<int[]> faces = loadOBJ(filename);
+
+            loadOBJ("your_obj_file_path.obj", vertices, faces);
+//            System.out.println("Vertices:");
+//            for (float[] vertex : vertices) {
+//                System.out.println("(" + vertex[0] + ", " + vertex[1] + ", " + vertex[2] + ")");
+//            }
+//            System.out.println("Faces:");
+//            for (int[] vertex : faces) {
+//                System.out.println("(" + vertex[0] + ", " + vertex[1] + ", " + vertex[2] + ")");
+//            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -59,7 +70,17 @@ public class Raytracer {
 
 
         // 5: Determine which faces from the obj file a line intersects
+        for (int i = 0; i < faces.size(); i++) {
+            int[] face = faces.get(i);
+            Vector3D v1 = vertices.get(face[0]);
+            Vector3D v2 = vertices.get(face[1]);
+            Vector3D v3 = vertices.get(face[2]);
 
+            // Check intersection
+            if (intersects(lineStart, lineEnd, v1, v2, v3)) {
+                System.out.println("Line intersects with face " + i);
+            }
+        }
 
         // 6: Compute the normal of a triangle in 3D
         Vector3D normal = computeNormal(vertex1, vertex2, vertex3);
@@ -84,22 +105,51 @@ public class Raytracer {
 
     //==================================================================================================================
     //TODO ========== 1/2: Read an obj file and store it as a list ==========
-    public static List<float[]> readVertices(String filename) throws IOException {
-        List<float[]> vertices = new ArrayList<>();
-        BufferedReader reader = new BufferedReader(new FileReader(filename));
+//    public static List<float[]> loadOBJ(String filename) throws IOException {
+//        List<float[]> vertices = new ArrayList<>();
+//        List<int[]> faces = new ArrayList<>();
+//        BufferedReader reader = new BufferedReader(new FileReader(filename));
+//        String line;
+//
+//        while ((line = reader.readLine()) != null) {
+//            if (line.startsWith("v ")) {
+//                String[] parts = line.split("\\s+");
+//                float x = Float.parseFloat(parts[1]);
+//                float y = Float.parseFloat(parts[2]);
+//                float z = Float.parseFloat(parts[3]);
+//                vertices.add(new float[]{Math.abs(x), Math.abs(y), Math.abs(z)}); // added abs to get absolute value
+//            } else if (line.startsWith("f ")) {
+//                String[] parts = line.split("\\s+");
+//                int[] face = new int[3];
+//                for (int i = 0; i < 3; i++) {
+//                    face[i] = Integer.parseInt(parts[i + 1]) - 1; // OBJ indices start from 1
+//                }
+//                faces.add(face);
+//            }
+//        }
+//        reader.close();
+//        return vertices;
+//    }
+    private static void loadOBJ(String filePath, List<Vector3D> vertices, List<int[]> faces) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(filePath));
         String line;
-
         while ((line = reader.readLine()) != null) {
             if (line.startsWith("v ")) {
                 String[] parts = line.split("\\s+");
-                float x = Float.parseFloat(parts[1]);
-                float y = Float.parseFloat(parts[2]);
-                float z = Float.parseFloat(parts[3]);
-                vertices.add(new float[]{Math.abs(x), Math.abs(y), Math.abs(z)}); // added abs to get absolute value
+                double x = Double.parseDouble(parts[1]);
+                double y = Double.parseDouble(parts[2]);
+                double z = Double.parseDouble(parts[3]);
+                vertices.add(new Vector3D(Math.abs(x), Math.abs(y), Math.abs(z)));
+            } else if (line.startsWith("f ")) {
+                String[] parts = line.split("\\s+");
+                int[] face = new int[3];
+                for (int i = 0; i < 3; i++) {
+                    face[i] = Integer.parseInt(parts[i + 1]) - 1; // OBJ indices start from 1
+                }
+                faces.add(face);
             }
         }
         reader.close();
-        return vertices;
     }
 
     //==================================================================================================================
@@ -154,8 +204,43 @@ public class Raytracer {
 
 
     //==================================================================================================================
-    //TODO ========== 5: Determine which faces from the obj file a line intersects ==========
+    //TODO ========== 5: Determine which faces from the obj file a line intersects ========== not complete
+    class Point {
+        double x, y, z;
+        public Point(double x, double y, double z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+    }
 
+    class Face {
+        int[] vertexIndices;
+        public Face(int[] vertexIndices) {
+            this.vertexIndices = vertexIndices;
+        }
+    }
+
+    public static boolean isIntersect(Point lineStart, Point lineEnd, Point v1, Point v2, Point v3) {
+        // Implementation of intersection check between line and triangle here
+        // You can use the method provided in the previous answer
+        return false;
+    }
+
+    public static List<Face> intersectingFaces(String objFilename, Point lineStart, Point lineEnd) throws IOException {
+        List<Face> intersectingFaces = new ArrayList<>();
+        List<Face> faces = parseOBJFile(objFilename);
+        for (Face face : faces) {
+            int[] vertexIndices = face.vertexIndices;
+            Point v1 = new Point(vertices.get(vertexIndices[0]).x, vertices.get(vertexIndices[0]).y, vertices.get(vertexIndices[0]).z);
+            Point v2 = new Point(vertices.get(vertexIndices[1]).x, vertices.get(vertexIndices[1]).y, vertices.get(vertexIndices[1]).z);
+            Point v3 = new Point(vertices.get(vertexIndices[2]).x, vertices.get(vertexIndices[2]).y, vertices.get(vertexIndices[2]).z);
+            if (isIntersect(lineStart, lineEnd, v1, v2, v3)) {
+                intersectingFaces.add(face);
+            }
+        }
+        return intersectingFaces;
+    }
 
     //==================================================================================================================
     //TODO ========== 6: Compute the normal of a triangle in 3D ==========
