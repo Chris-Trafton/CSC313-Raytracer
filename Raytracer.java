@@ -32,13 +32,13 @@ public class Raytracer {
 
     public static void main(String[] args) throws IOException {
         String filename = "teapot.obj"; // Path to your OBJ file
-        double[] point = {1, 2, 3}; // Example point
-        double[] linePoint1 = {0, 0, 0}; // Example line point 1
-        double[] linePoint2 = {1, 1, 1}; // Example line point 2
-        double[] line1Point1 = {0, 0, 0};
-        double[] line1Point2 = {1, 1, 1};
-        double[] line2Point1 = {0, 0, 0};
-        double[] line2Point2 = {1, -1, 1};
+        Vector3D point = new Vector3D(1, 2, 3);
+        Vector3D linePoint1 = new Vector3D(0, 0, 0);
+        Vector3D linePoint2 = new Vector3D(1, 1, 1);
+        Vector3D line1Point1 = new Vector3D(0, 0, 0);
+        Vector3D line1Point2 = new Vector3D(1, 1, 1);
+        Vector3D line2Point1 = new Vector3D(0, 0, 0);
+        Vector3D line2Point2 = new Vector3D(1, -1, 1);
         Vector3D lineStart = new Vector3D(0, 0, 0);
         Vector3D lineEnd = new Vector3D(1, 1, 1);
 
@@ -46,18 +46,15 @@ public class Raytracer {
         List<Vector3D> vertices = new ArrayList<>();
         List<int[]> faces = new ArrayList<>();
         try {
-//            List<float[]> vertices = loadOBJ(filename);
-//            List<int[]> faces = loadOBJ(filename);
-
-            loadOBJ("your_obj_file_path.obj", vertices, faces);
-//            System.out.println("Vertices:");
-//            for (float[] vertex : vertices) {
-//                System.out.println("(" + vertex[0] + ", " + vertex[1] + ", " + vertex[2] + ")");
-//            }
-//            System.out.println("Faces:");
-//            for (int[] vertex : faces) {
-//                System.out.println("(" + vertex[0] + ", " + vertex[1] + ", " + vertex[2] + ")");
-//            }
+            loadOBJ(filename, vertices, faces);
+            System.out.println("Vertices:");
+            for (Vector3D vertex : vertices) {
+                System.out.println("(" + vertex.x + ", " + vertex.y + ", " + vertex.z + ")");
+            }
+            System.out.println("Faces:");
+            for (int[] vertex : faces) {
+                System.out.println("(" + vertex[0] + ", " + vertex[1] + ", " + vertex[2] + ")");
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -88,7 +85,7 @@ public class Raytracer {
             Vector3D v3 = vertices.get(face[2]);
 
             // Check intersection
-            if (intersects(lineStart, lineEnd, v1, v2, v3)) {
+            if (isIntersect(lineStart, lineEnd, v1, v2, v3)) {
                 System.out.println("Line intersects with face " + i);
             }
         }
@@ -108,7 +105,7 @@ public class Raytracer {
         drawTriangle(image, vertex1, vertex2, vertex3, illuminatedColor); // Draw triangle with illuminated color
 
         // 9: Raytrace an obj in 3D for illumination intensities over a 2D screen
-
+        BufferedImage obj2D = raytraceObjTo2D(vertices);
 
         // 10: Output screen pixels as an image
 //        exportPNG();
@@ -116,31 +113,6 @@ public class Raytracer {
 
     //==================================================================================================================
     //TODO ========== 1/2: Read an obj file and store it as a list ==========
-//    public static List<float[]> loadOBJ(String filename) throws IOException {
-//        List<float[]> vertices = new ArrayList<>();
-//        List<int[]> faces = new ArrayList<>();
-//        BufferedReader reader = new BufferedReader(new FileReader(filename));
-//        String line;
-//
-//        while ((line = reader.readLine()) != null) {
-//            if (line.startsWith("v ")) {
-//                String[] parts = line.split("\\s+");
-//                float x = Float.parseFloat(parts[1]);
-//                float y = Float.parseFloat(parts[2]);
-//                float z = Float.parseFloat(parts[3]);
-//                vertices.add(new float[]{Math.abs(x), Math.abs(y), Math.abs(z)}); // added abs to get absolute value
-//            } else if (line.startsWith("f ")) {
-//                String[] parts = line.split("\\s+");
-//                int[] face = new int[3];
-//                for (int i = 0; i < 3; i++) {
-//                    face[i] = Integer.parseInt(parts[i + 1]) - 1; // OBJ indices start from 1
-//                }
-//                faces.add(face);
-//            }
-//        }
-//        reader.close();
-//        return vertices;
-//    }
     private static void loadOBJ(String filePath, List<Vector3D> vertices, List<int[]> faces) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(filePath));
         String line;
@@ -165,48 +137,50 @@ public class Raytracer {
 
     //==================================================================================================================
     //TODO ========== 3: Compute the distance between a point and a line ==========
-    public static double distancePointLine(double[] point, double[] linePoint1, double[] linePoint2) {
-        double[] lineVector = new double[3];
-        double[] pointToLineVector = new double[3];
+    public static double distancePointLine(Vector3D point, Vector3D linePoint1, Vector3D linePoint2) {
+        Vector3D lineVector = new Vector3D(0, 0, 0);
+        Vector3D pointToLineVector = new Vector3D(0, 0, 0);
 
         // Calculate the vector along the line
-        for (int i = 0; i < 3; i++) {
-            lineVector[i] = linePoint2[i] - linePoint1[i];
-        }
+        lineVector.x = linePoint2.x - linePoint1.x;
+        lineVector.y = linePoint2.y - linePoint1.y;
+        lineVector.z = linePoint2.z - linePoint1.z;
 
         // Calculate the vector from a point on the line to the given point
-        for (int i = 0; i < 3; i++) {
-            pointToLineVector[i] = point[i] - linePoint1[i];
-        }
+        pointToLineVector.x = point.x - linePoint1.x;
+        pointToLineVector.y = point.y - linePoint1.y;
+        pointToLineVector.z = point.z - linePoint1.z;
 
         // Calculate the projection of the point-to-line vector onto the line vector
         double projection = dotProduct(pointToLineVector, lineVector) / dotProduct(lineVector, lineVector);
 
         // Calculate the closest point on the line to the given point
-        double[] closestPoint = new double[3];
-        for (int i = 0; i < 3; i++) {
-            closestPoint[i] = linePoint1[i] + projection * lineVector[i];
-        }
+        Vector3D closestPoint = new Vector3D(0, 0, 0);
+        closestPoint.x = linePoint1.x + projection * lineVector.x;
+        closestPoint.y = linePoint1.y + projection * lineVector.y;
+        closestPoint.z = linePoint1.z + projection * lineVector.z;
 
         // Calculate the distance between the given point and the closest point on the line
         return distance(point, closestPoint);
     }
 
     // Function to compute dot product of two vectors
-    public static double dotProduct(double[] vector1, double[] vector2) {
+    public static double dotProduct(Vector3D vector1, Vector3D vector2) {
         double result = 0;
-        for (int i = 0; i < vector1.length; i++) {
-            result += vector1[i] * vector2[i];
-        }
+        result += vector1.x * vector2.x;
+        result += vector1.y * vector2.y;
+        result += vector1.z * vector2.z;
+
         return result;
     }
 
     // Function to compute distance between two points
-    public static double distance(double[] point1, double[] point2) {
+    public static double distance(Vector3D point1, Vector3D point2) {
         double sum = 0;
-        for (int i = 0; i < point1.length; i++) {
-            sum += Math.pow(point1[i] - point2[i], 2);
-        }
+        sum += Math.pow(point1.x - point2.x, 2);
+        sum += Math.pow(point1.y - point2.y, 2);
+        sum += Math.pow(point1.z - point2.z, 2);
+
         return Math.sqrt(sum);
     }
 
@@ -251,63 +225,80 @@ public class Raytracer {
         return false;
     }
 
-//    public static Vector3D subtract(Vector3D vector1, Vector3D vector2) {
-//        Vector3D ret;
-//        for (int i = 0; i < vector1.size(); i++) {
-//            double d = vector1[i] - vector2[i];
-//            ret[i] = d;
-//        }
-////        double u = vector1[0] - vector2[0];
-////        double v = vector1[1] - vector2[1];
-////        double w = vector1[2] - vector2[2];
-//        return ret;
-//    }
-
-//    public static double[] crossProduct(double[] vector1, double[] vector2) {
-//        double[] ret = new double[vector1.length];
-//        ret[0] = (vector1[1] * vector2[2]) - (vector1[2] * vector2[1]);
-//        ret[1] = (vector1[2] * vector2[0]) - (vector1[0] * vector2[2]);
-//        ret[2] = (vector1[0] * vector2[1]) - (vector1[1] * vector2[0]);
-//        return ret;
-//    }
-
     //==================================================================================================================
     //TODO ========== 5: Determine which faces from the obj file a line intersects ========== not complete
-    class Point {
-        double x, y, z;
-        public Point(double x, double y, double z) {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
+    public static boolean isIntersect(Vector3D lineStart, Vector3D lineEnd, Vector3D facePoint1, Vector3D facePoint2, Vector3D facePoint3) {
+        // Calculate vectors
+        double[] lineVector = {lineEnd.x - lineStart.x, lineEnd.y - lineStart.y, lineEnd.z - lineStart.z};
+
+        // Check each edge of the triangle
+        boolean intersects = intersect(lineStart, lineVector, facePoint1, facePoint2, facePoint3);
+        intersects |= intersect(lineStart, lineVector, facePoint2, facePoint3, facePoint1);
+        intersects |= intersect(lineStart, lineVector, facePoint3, facePoint1, facePoint2);
+
+        return intersects;
     }
 
-    class Face {
-        int[] vertexIndices;
-        public Face(int[] vertexIndices) {
-            this.vertexIndices = vertexIndices;
-        }
-    }
+    // Check intersection between line and edge
+    private static boolean intersect(Vector3D lineStart, double[] lineVector, Vector3D v1, Vector3D v2, Vector3D v3) {
+        double[] edge1 = {v2.x - v1.x, v2.y - v1.y, v2.z - v1.z};
+        double[] edge2 = {v3.x - v1.x, v3.y - v1.y, v3.z - v1.z};
 
-    public static boolean isIntersect(Point lineStart, Point lineEnd, Point v1, Point v2, Point v3) {
-        // Implementation of intersection check between line and triangle here
-        // You can use the method provided in the previous answer
-        return false;
-    }
+        // Calculate normal to the triangle
+        double[] normal = {
+                edge1[1] * edge2[2] - edge1[2] * edge2[1],
+                edge1[2] * edge2[0] - edge1[0] * edge2[2],
+                edge1[0] * edge2[1] - edge1[1] * edge2[0]
+        };
 
-    public static List<Face> intersectingFaces(String objFilename, Point lineStart, Point lineEnd) throws IOException {
-        List<Face> intersectingFaces = new ArrayList<>();
-        List<Face> faces = parseOBJFile(objFilename);
-        for (Face face : faces) {
-            int[] vertexIndices = face.vertexIndices;
-            Point v1 = new Point(vertices.get(vertexIndices[0]).x, vertices.get(vertexIndices[0]).y, vertices.get(vertexIndices[0]).z);
-            Point v2 = new Point(vertices.get(vertexIndices[1]).x, vertices.get(vertexIndices[1]).y, vertices.get(vertexIndices[1]).z);
-            Point v3 = new Point(vertices.get(vertexIndices[2]).x, vertices.get(vertexIndices[2]).y, vertices.get(vertexIndices[2]).z);
-            if (isIntersect(lineStart, lineEnd, v1, v2, v3)) {
-                intersectingFaces.add(face);
-            }
+        // Calculate parameter t
+        double dotProduct = normal[0] * lineVector[0] + normal[1] * lineVector[1] + normal[2] * lineVector[2];
+        if (Math.abs(dotProduct) < 1e-8) {
+            // Line is parallel to triangle, no intersection
+            return false;
         }
-        return intersectingFaces;
+
+        double[] startToV1 = {lineStart.x - v1.x, lineStart.y - v1.y, lineStart.z - v1.z};
+        double t = -(normal[0] * startToV1[0] + normal[1] * startToV1[1] + normal[2] * startToV1[2]) / dotProduct;
+
+        if (t < 0 || t > 1) {
+            // Intersection point is outside line segment
+            return false;
+        }
+
+        // Calculate intersection point
+        double[] intersectionPoint = {
+                lineStart.x + t * lineVector[0],
+                lineStart.y + t * lineVector[1],
+                lineStart.z + t * lineVector[2]
+        };
+
+        // Check if intersection point is inside the triangle
+        double[] edge3 = {v1.x - v2.x, v1.y - v2.y, v1.z - v2.z};
+        double[] edge4 = {v2.x - v3.x, v2.y - v3.y, v2.z - v3.z};
+        double[] edge5 = {v3.x - v1.x, v3.y - v1.y, v3.z - v1.z};
+
+        double[] crossProduct1 = {
+                edge1[1] * edge3[2] - edge1[2] * edge3[1],
+                edge1[2] * edge3[0] - edge1[0] * edge3[2],
+                edge1[0] * edge3[1] - edge1[1] * edge3[0]
+        };
+        double[] crossProduct2 = {
+                edge2[1] * edge4[2] - edge2[2] * edge4[1],
+                edge2[2] * edge4[0] - edge2[0] * edge4[2],
+                edge2[0] * edge4[1] - edge2[1] * edge4[0]
+        };
+        double[] crossProduct3 = {
+                edge3[1] * edge5[2] - edge3[2] * edge5[1],
+                edge3[2] * edge5[0] - edge3[0] * edge5[2],
+                edge3[0] * edge5[1] - edge3[1] * edge5[0]
+        };
+
+        double dotProduct1 = crossProduct1[0] * (intersectionPoint[0] - v1.x) + crossProduct1[1] * (intersectionPoint[1] - v1.y) + crossProduct1[2] * (intersectionPoint[2] - v1.z);
+        double dotProduct2 = crossProduct2[0] * (intersectionPoint[0] - v2.x) + crossProduct2[1] * (intersectionPoint[1] - v2.y) + crossProduct2[2] * (intersectionPoint[2] - v2.z);
+        double dotProduct3 = crossProduct3[0] * (intersectionPoint[0] - v3.x) + crossProduct3[1] * (intersectionPoint[1] - v3.y) + crossProduct3[2] * (intersectionPoint[2] - v3.z);
+
+        return (dotProduct1 >= 0 && dotProduct2 >= 0 && dotProduct3 >= 0);
     }
 
     //==================================================================================================================
@@ -351,16 +342,17 @@ public class Raytracer {
 
     //==================================================================================================================
     //TODO ========== 7: Compute the angle between two lines ==========
-    public static double angleBetweenLines(double[] line1Point1, double[] line1Point2,
-                                           double[] line2Point1, double[] line2Point2) {
-        double[] line1Vector = new double[3];
-        double[] line2Vector = new double[3];
+    public static double angleBetweenLines(Vector3D line1Point1, Vector3D line1Point2, Vector3D line2Point1, Vector3D line2Point2) {
+        Vector3D line1Vector = new Vector3D(0, 0, 0);
+        Vector3D line2Vector = new Vector3D(0, 0, 0);
 
         // Calculate vectors along the lines
-        for (int i = 0; i < 3; i++) {
-            line1Vector[i] = line1Point2[i] - line1Point1[i];
-            line2Vector[i] = line2Point2[i] - line2Point1[i];
-        }
+        line1Vector.x = line1Point2.x - line1Point1.x;
+        line2Vector.x = line2Point2.x - line2Point1.x;
+        line1Vector.y = line1Point2.y - line1Point1.y;
+        line2Vector.y = line2Point2.y - line2Point1.y;
+        line1Vector.z = line1Point2.z - line1Point1.z;
+        line2Vector.z = line2Point2.z - line2Point1.z;
 
         // Compute dot product of the two vectors
         double dotProduct = dotProduct(line1Vector, line2Vector);
@@ -377,9 +369,10 @@ public class Raytracer {
     }
 
     // Function to compute magnitude of a vector
-    public static double magnitude(double[] vector) {
+    public static double magnitude(Vector3D vector) {
         double sumOfSquares = 0;
-        for (double component : vector) {
+        double[] tempVector = {vector.x, vector.y, vector.z};
+        for (double component : tempVector) {
             sumOfSquares += component * component;
         }
         return Math.sqrt(sumOfSquares);
@@ -410,7 +403,26 @@ public class Raytracer {
 
     //==================================================================================================================
     //TODO ========== 9: Raytrace an obj in 3D for illumination intensities over a 2D screen ==========
+    public static BufferedImage raytraceObjTo2D(List<Vector3D> vertices) {
+        BufferedImage ret = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_RGB);
+        // first set all pixels to white
+        for (int i = 0; i < IMAGE_WIDTH; i++) {
+            for (int j = 0; j < IMAGE_HEIGHT; j++) {
+                ret.setRGB(i, j, 0);
+            }
+        }
 
+        // where a vertex is, set that pixel to red
+        for (int i = 0; i < vertices.size(); i++) {
+            Vector3D vertex = vertices.get(i);
+            double x = vertex.x;
+            double y = vertex.y;
+            int color = Integer.parseInt(SURFACE_COLOR.toString());
+            ret.setRGB((int)x, (int) y, color);
+        }
+
+        return ret;
+    }
 
     //==================================================================================================================
     //TODO ========== 10: Output screen pixels as an image ==========
