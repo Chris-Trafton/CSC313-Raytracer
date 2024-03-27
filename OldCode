@@ -1,0 +1,30 @@
+Old code for loading the obj file
+
+//            List<float[]> vertices = loadOBJ(filename);
+//            List<int[]> faces = loadOBJ(filename);
+
+//    public static List<float[]> loadOBJ(String filename) throws IOException {
+//        List<float[]> vertices = new ArrayList<>();
+//        List<int[]> faces = new ArrayList<>();
+//        BufferedReader reader = new BufferedReader(new FileReader(filename));
+//        String line;
+//
+//        while ((line = reader.readLine()) != null) {
+//            if (line.startsWith("v ")) {
+//                String[] parts = line.split("\\s+");
+//                float x = Float.parseFloat(parts[1]);
+//                float y = Float.parseFloat(parts[2]);
+//                float z = Float.parseFloat(parts[3]);
+//                vertices.add(new float[]{Math.abs(x), Math.abs(y), Math.abs(z)}); // added abs to get absolute value
+//            } else if (line.startsWith("f ")) {
+//                String[] parts = line.split("\\s+");
+//                int[] face = new int[3];
+//                for (int i = 0; i < 3; i++) {
+//                    face[i] = Integer.parseInt(parts[i + 1]) - 1; // OBJ indices start from 1
+//                }
+//                faces.add(face);
+//            }
+//        }
+//        reader.close();
+//        return vertices;
+//    }
