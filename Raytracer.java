@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.lang.Math;
 import java.awt.Color;
-import java.util.Vector;
 
 public class Raytracer {
     // Define light direction
@@ -33,13 +32,13 @@ public class Raytracer {
 
     public static void main(String[] args) throws IOException {
         String filename = "teapot.obj"; // Path to your OBJ file
-        double[] point = {1, 2, 3}; // Example point
-        double[] linePoint1 = {0, 0, 0}; // Example line point 1
-        double[] linePoint2 = {1, 1, 1}; // Example line point 2
-        double[] line1Point1 = {0, 0, 0};
-        double[] line1Point2 = {1, 1, 1};
-        double[] line2Point1 = {0, 0, 0};
-        double[] line2Point2 = {1, -1, 1};
+        Vector3D point = new Vector3D(1, 2, 3);
+        Vector3D linePoint1 = new Vector3D(0, 0, 0);
+        Vector3D linePoint2 = new Vector3D(1, 1, 1);
+        Vector3D line1Point1 = new Vector3D(0, 0, 0);
+        Vector3D line1Point2 = new Vector3D(1, 1, 1);
+        Vector3D line2Point1 = new Vector3D(0, 0, 0);
+        Vector3D line2Point2 = new Vector3D(1, -1, 1);
         Vector3D lineStart = new Vector3D(0, 0, 0);
         Vector3D lineEnd = new Vector3D(1, 1, 1);
 
@@ -47,7 +46,7 @@ public class Raytracer {
         List<Vector3D> vertices = new ArrayList<>();
         List<int[]> faces = new ArrayList<>();
         try {
-            loadOBJ("teapot.obj", vertices, faces);
+            loadOBJ(filename, vertices, faces);
             System.out.println("Vertices:");
             for (Vector3D vertex : vertices) {
                 System.out.println("(" + vertex.x + ", " + vertex.y + ", " + vertex.z + ")");
@@ -127,48 +126,50 @@ public class Raytracer {
 
     //==================================================================================================================
     //TODO ========== 3: Compute the distance between a point and a line ==========
-    public static double distancePointLine(double[] point, double[] linePoint1, double[] linePoint2) {
-        double[] lineVector = new double[3];
-        double[] pointToLineVector = new double[3];
+    public static double distancePointLine(Vector3D point, Vector3D linePoint1, Vector3D linePoint2) {
+        Vector3D lineVector = new Vector3D(0, 0, 0);
+        Vector3D pointToLineVector = new Vector3D(0, 0, 0);
 
         // Calculate the vector along the line
-        for (int i = 0; i < 3; i++) {
-            lineVector[i] = linePoint2[i] - linePoint1[i];
-        }
+        lineVector.x = linePoint2.x - linePoint1.x;
+        lineVector.y = linePoint2.y - linePoint1.y;
+        lineVector.z = linePoint2.z - linePoint1.z;
 
         // Calculate the vector from a point on the line to the given point
-        for (int i = 0; i < 3; i++) {
-            pointToLineVector[i] = point[i] - linePoint1[i];
-        }
+        pointToLineVector.x = point.x - linePoint1.x;
+        pointToLineVector.y = point.y - linePoint1.y;
+        pointToLineVector.z = point.z - linePoint1.z;
 
         // Calculate the projection of the point-to-line vector onto the line vector
         double projection = dotProduct(pointToLineVector, lineVector) / dotProduct(lineVector, lineVector);
 
         // Calculate the closest point on the line to the given point
-        double[] closestPoint = new double[3];
-        for (int i = 0; i < 3; i++) {
-            closestPoint[i] = linePoint1[i] + projection * lineVector[i];
-        }
+        Vector3D closestPoint = new Vector3D(0, 0, 0);
+        closestPoint.x = linePoint1.x + projection * lineVector.x;
+        closestPoint.y = linePoint1.y + projection * lineVector.y;
+        closestPoint.z = linePoint1.z + projection * lineVector.z;
 
         // Calculate the distance between the given point and the closest point on the line
         return distance(point, closestPoint);
     }
 
     // Function to compute dot product of two vectors
-    public static double dotProduct(double[] vector1, double[] vector2) {
+    public static double dotProduct(Vector3D vector1, Vector3D vector2) {
         double result = 0;
-        for (int i = 0; i < vector1.length; i++) {
-            result += vector1[i] * vector2[i];
-        }
+        result += vector1.x * vector2.x;
+        result += vector1.y * vector2.y;
+        result += vector1.z * vector2.z;
+
         return result;
     }
 
     // Function to compute distance between two points
-    public static double distance(double[] point1, double[] point2) {
+    public static double distance(Vector3D point1, Vector3D point2) {
         double sum = 0;
-        for (int i = 0; i < point1.length; i++) {
-            sum += Math.pow(point1[i] - point2[i], 2);
-        }
+        sum += Math.pow(point1.x - point2.x, 2);
+        sum += Math.pow(point1.y - point2.y, 2);
+        sum += Math.pow(point1.z - point2.z, 2);
+
         return Math.sqrt(sum);
     }
 
@@ -293,16 +294,17 @@ public class Raytracer {
 
     //==================================================================================================================
     //TODO ========== 7: Compute the angle between two lines ==========
-    public static double angleBetweenLines(double[] line1Point1, double[] line1Point2,
-                                           double[] line2Point1, double[] line2Point2) {
-        double[] line1Vector = new double[3];
-        double[] line2Vector = new double[3];
+    public static double angleBetweenLines(Vector3D line1Point1, Vector3D line1Point2, Vector3D line2Point1, Vector3D line2Point2) {
+        Vector3D line1Vector = new Vector3D(0, 0, 0);
+        Vector3D line2Vector = new Vector3D(0, 0, 0);
 
         // Calculate vectors along the lines
-        for (int i = 0; i < 3; i++) {
-            line1Vector[i] = line1Point2[i] - line1Point1[i];
-            line2Vector[i] = line2Point2[i] - line2Point1[i];
-        }
+        line1Vector.x = line1Point2.x - line1Point1.x;
+        line2Vector.x = line2Point2.x - line2Point1.x;
+        line1Vector.y = line1Point2.y - line1Point1.y;
+        line2Vector.y = line2Point2.y - line2Point1.y;
+        line1Vector.z = line1Point2.z - line1Point1.z;
+        line2Vector.z = line2Point2.z - line2Point1.z;
 
         // Compute dot product of the two vectors
         double dotProduct = dotProduct(line1Vector, line2Vector);
@@ -319,9 +321,10 @@ public class Raytracer {
     }
 
     // Function to compute magnitude of a vector
-    public static double magnitude(double[] vector) {
+    public static double magnitude(Vector3D vector) {
         double sumOfSquares = 0;
-        for (double component : vector) {
+        double[] tempVector = {vector.x, vector.y, vector.z};
+        for (double component : tempVector) {
             sumOfSquares += component * component;
         }
         return Math.sqrt(sumOfSquares);
