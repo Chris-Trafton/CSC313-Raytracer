@@ -27,8 +27,8 @@ public class Raytracer {
     private static final Color SURFACE_COLOR = Color.RED;
 
     // Image dimensions
-    private static final int IMAGE_WIDTH = 500;
-    private static final int IMAGE_HEIGHT = 500;
+    private static final int IMAGE_WIDTH = 3700;
+    private static final int IMAGE_HEIGHT = 3700;
 
     public static void main(String[] args) throws IOException {
         String filename = "teapot.obj"; // Path to your OBJ file
@@ -110,7 +110,8 @@ public class Raytracer {
         drawTriangle(image, vertex1, vertex2, vertex3, illuminatedColor); // Draw triangle with illuminated color
 
         // 9: Raytrace an obj in 3D for illumination intensities over a 2D screen
-        BufferedImage obj2D = raytraceObjTo2D(vertices);
+//        BufferedImage obj2D = raytraceObjTo2D(vertices);
+        BufferedImage obj2D = raytraceObjTo2D(faces);
 
         // 10: Output screen pixels as an image
         exportPNG(obj2D);
@@ -408,7 +409,7 @@ public class Raytracer {
 
     //==================================================================================================================
     //TODO ========== 9: Raytrace an obj in 3D for illumination intensities over a 2D screen ==========
-    public static BufferedImage raytraceObjTo2D(List<Vector3D> vertices) {
+    public static BufferedImage raytraceObjTo2D(List<int[]> faces) {// List<Vector3D> vertices) {
         BufferedImage ret = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_RGB);
         // first set all pixels to white
         for (int i = 0; i < IMAGE_WIDTH; i++) {
@@ -418,10 +419,10 @@ public class Raytracer {
         }
 
         // where a vertex is, set that pixel to red
-        for (int i = 0; i < vertices.size(); i++) {
-            Vector3D vertex = vertices.get(i);
-            double x = vertex.x;
-            double y = vertex.y;
+        for (int i = 0; i < faces.size(); i++) {
+            int[] face = faces.get(i);
+            int x = face[0];
+            int y = face[1];
             String color = SURFACE_COLOR.toString();
             int equalsIndex = color.indexOf("=") + 1;
             String rgb = color.substring(equalsIndex, equalsIndex + 3);
